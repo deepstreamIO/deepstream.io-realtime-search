@@ -83,7 +83,7 @@ export class Provider {
   constructor (config: Partial<RealtimeSearchConfig>) {
     this.config = {  ...defaultConfig, ...config}
     this.logger = new Logger(this.config.logLevel)
-    this.hashReplaceRegex = new RegExp(`^${this.config.listNamePrefix}\\?(.*)`)
+    this.hashReplaceRegex = new RegExp(`^${this.config.listNamePrefix}(.*)`)
     this.databaseClient = new MongoDBConnection(this.config, this.logger)
   }
 

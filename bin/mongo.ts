@@ -81,11 +81,11 @@ function loadJSON (filePath: string) {
     try {
       return JSON.parse(content)
     } catch (e) {
-      console.error(`Error parsing collection lookup file from path ${path.resolve('.', filePath)}`)
+      console.error(`Error parsing collection lookup file from path ${path.resolve('.', filePath)}`, e)
       process.exit(1)
     }
   } catch (e) {
-    console.error(`Error loading collection lookup file from path ${path.resolve('.', filePath)}`)
+    console.error(`Error loading collection lookup file from path ${path.resolve('.', filePath)}`, e)
     process.exit(1)
   }
 }
