@@ -1,7 +1,7 @@
 import * as crypto from 'crypto'
 const deepstream = require('@deepstream/client')
 import { Client as DeepstreamClient } from '@deepstream/client'
-import { JSONObject, RecordData } from '@deepstream/client/dist/constants'
+import { JSONObject, RecordData, EVENT } from '@deepstream/client/dist/constants'
 import { RPCResponse } from '@deepstream/client/dist/rpc/rpc-response'
 import { ListenResponse } from '@deepstream/client/dist/util/listener'
 
@@ -134,8 +134,8 @@ export class Provider {
       maxReconnectInterval: 5000
     })
 
-    this.deepstreamClient.on('error', (error: Error) => {
-      this.logger.fatal('Client error: ', error)
+    this.deepstreamClient.on('error', (error: Error, event: EVENT) => {
+      this.logger.fatal(`Client error: ${error.message}`, event as any)
     })
 
     try {
