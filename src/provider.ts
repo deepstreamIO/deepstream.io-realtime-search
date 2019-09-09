@@ -97,7 +97,7 @@ export class Provider {
 
     this.setupRPC()
 
-    const pattern = `${this.config.listNamePrefix}[\\?].*`
+    const pattern = `${this.config.listNamePrefix}.*`
     this.logger.info(`listening for ${pattern}`)
     this.deepstreamClient.record.listen(pattern, this.onSubscription.bind(this))
 
