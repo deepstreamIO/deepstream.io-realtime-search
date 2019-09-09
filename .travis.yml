@@ -7,9 +7,6 @@ services:
 node_js:
   - "10"
 
-env:
-  - DEFAULT_DELAY: 50
-
 script:
   - npm run lint;
   - npm run tsc;
