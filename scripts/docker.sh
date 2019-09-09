@@ -16,8 +16,8 @@ docker push deepstreamio/realtime-search:latest
 echo 'Replacing node with node-alpine'
 sed -i 's@node:10@node:10-alpine@' Dockerfile
 echo 'Building node alpine'
-docker build . -t deepstreamio/realtime-search:${PACKAGE_VERSION}-alpine
+docker build . -t deepstreamio/realtime-search:${PACKAGE_VERSION}-alpine -t deepstreamio/realtime-search:latest-alpine
 echo 'Pushing node alpine'
 docker push deepstreamio/realtime-search:${PACKAGE_VERSION}-alpine
-
+docker push deepstreamio/realtime-search:latest-alpine
 cd ../
