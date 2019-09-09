@@ -1,0 +1,36 @@
+sudo: true
+language: node_js
+
+services:
+  - docker
+
+node_js:
+  - "10"
+
+env:
+  - DEFAULT_DELAY: 50
+
+script:
+  - npm run lint;
+  - npm run tsc;
+  - npm run test:coverage;
+
+after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+
+notifications:
+  email: false
+
+deploy:
+- provider: npm
+  email: "info@deepstream.io"
+  api_key: ${NPM_TOKEN}
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $TRAVIS_OS_NAME = linux
+- provider: script
+  script: bash scripts/docker.sh
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $TRAVIS_OS_NAME = linux
