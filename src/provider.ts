@@ -167,8 +167,8 @@ export class Provider {
         const hash = this.hashQueryString(query)
         this.logger.info(`Created hash ${hash} for realtime-search using RPC`)
 
-        const exists = this.deepstreamClient.record.has(`${this.config.metaRecordPrefix}${hash}`)
-        if (exists) {
+        const exists = await this.deepstreamClient.record.has(`${this.config.metaRecordPrefix}${hash}`)
+        if (exists === true) {
           // Query already exists, so use that
           response.send(hash)
           return
