@@ -7,7 +7,8 @@ import { RealtimeSearch } from '../provider'
 
 interface MongoDBConfig extends RealtimeSearchConfig {
     connectionConfig: {
-        connectionUrl: string
+        connectionUrl: string,
+        poolSize: number
     }
 }
 
@@ -22,7 +23,8 @@ export class MongoDBConnection implements DatabaseClient {
         try {
           this.mongoClient = await MongoClient.connect(this.config.connectionConfig.connectionUrl, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            poolSize: this.config.connectionConfig.poolSize
           })
           this.mongoClient.db(this.config.database)
           this.logger.info(`Connected successfully to mongodb database ${this.config.database}`)

@@ -43,7 +43,8 @@ function action () {
       deepstreamUrl: providerCLI.deepstreamUrl || process.env.DEEPSTREAM_URL || 'ws://localhost:6020/deepstream',
       deepstreamCredentials: { backendSecret: process.env.DEEPSTREAM_PASSWORD || 'deepstream_password' },
       connectionConfig: {
-        connectionUrl: process.env.MONGO_URL || 'mongodb://localhost:27017'
+        connectionUrl: process.env.MONGO_URL || 'mongodb://localhost:27017',
+        poolSize: process.env.MONGO_POOL_SIZE || 100,
       },
       logLevel: LogLevel.DEBUG,
       collectionLookup: providerCLI.collectionLookup
