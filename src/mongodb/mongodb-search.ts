@@ -7,6 +7,7 @@ export class MongoDBSearch implements RealtimeSearch {
   private collection: Collection
   private changeStream: ChangeStream
   private mongoQuery: FilterQuery<any>
+  private isReady: boolean = false
 
   constructor (
     logger: Logger,
@@ -20,15 +21,16 @@ export class MongoDBSearch implements RealtimeSearch {
     this.collection = db.collection(this.query.table)
     this.changeStream = this.collection.watch([], {})
     this.changeStream.on('change', this.runQuery.bind(this))
-    this.runQuery()
   }
 
-  private async runQuery () {
-    const result = await this.collection.find(this.mongoQuery, { projection: { _id: 1 } }).toArray()
-    const entries = result.map((r) => `${r._id}`)
-    this.callbacks.onResultsChanged(entries)
-    // TODO: This shouldn't be called each time, even though it doesn't change anything
-    this.callbacks.onInitialPopulation()
+  /**
+   * Returns once the initial search is completed
+   */
+  public async whenReady (): Promise<void> {
+    if (!this.isReady) {
+      await this.runQuery()
+      this.isReady = true
+    }
   }
 
   /**
@@ -38,6 +40,12 @@ export class MongoDBSearch implements RealtimeSearch {
    */
   public async stop (): Promise<void> {
     this.changeStream.close()
+  }
+
+  private async runQuery () {
+    const result = await this.collection.find(this.mongoQuery, { projection: { _id: 1 } }).toArray()
+    const entries = result.map((r) => `${r._id}`)
+    this.callbacks.onResultsChanged(entries)
   }
 }
 

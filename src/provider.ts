@@ -9,12 +9,12 @@ import { Logger, LogLevel } from './logger'
 import { MongoDBConnection } from './mongodb/mongodb-connection'
 
 export interface RealtimeSearch {
+  whenReady: () => Promise<void>
   stop: () => Promise<void>
 }
 
 export interface RealtimeSearchCallbacks {
-  onResultsChanged: (entries: string[]) => void,
-  onInitialPopulation: () => void
+  onResultsChanged: (entries: string[]) => void
 }
 
 export interface DatabaseClient {
@@ -167,13 +167,19 @@ export class Provider {
         const hash = this.hashQueryString(query)
         this.logger.info(`Created hash ${hash} for realtime-search using RPC`)
 
+        const exists = this.deepstreamClient.record.has(`${this.config.metaRecordPrefix}${hash}`)
+        if (exists) {
+          // Query already exists, so use that
+          response.send(hash)
+          return
+        }
+
         try {
           await this.deepstreamClient.record.setDataWithAck(
             `${this.config.metaRecordPrefix}${hash}`,
             {
               query,
-              hash,
-              populated: false
+              hash
             } as never as RecordData
           )
           response.send(hash)
@@ -245,19 +251,16 @@ export class Provider {
 
     this.logger.info(`new search instance being made for search ${hash}`)
 
-    this.searches.set(
-      hash,
-      this.databaseClient.getSearch(
-        this.logger,
-        this.config.database,
-        query,
-        {
-          onResultsChanged: this.onResultsChanged.bind(this, `${this.config.listNamePrefix}${hash}`),
-          onInitialPopulation: this.onInitialPopulation.bind(this, recordName)
-        }
-      )
+    const search = this.databaseClient.getSearch(
+      this.logger,
+      this.config.database,
+      query,
+      {
+        onResultsChanged: this.onResultsChanged.bind(this, `${this.config.listNamePrefix}${hash}`)
+      }
     )
-
+    await search.whenReady()
+    this.searches.set(hash, search)
     return true
   }
 
@@ -278,11 +281,13 @@ export class Provider {
       this.logger.error(`Error finding search with hash ${hash}`)
     }
 
-    // const record = this.deepstreamClient.record.getRecord(`${this.config.metaRecordPrefix}${hash}`)
-    // await record.delete()
+    const record = this.deepstreamClient.record.getRecord(`${this.config.metaRecordPrefix}${hash}`)
+    await record.whenReady()
+    await record.delete()
 
-    // const list = this.deepstreamClient.record.getRecord(`${this.config.listName}${hash}`)
-    // await list.delete()
+    const list = this.deepstreamClient.record.getRecord(`${this.config.listNamePrefix}${hash}`)
+    await list.whenReady()
+    await list.delete()
   }
 
   private hashQueryString (query: Query) {
@@ -340,15 +345,6 @@ export class Provider {
       this.logger.debug(`Updated ${listName} with ${entries.length} entries`)
     } catch (e) {
       this.logger.error(`Error setting entries for list ${listName}`, e)
-    }
-  }
-
-  private async onInitialPopulation (searchMetaRecordName: string) {
-    try {
-      await this.deepstreamClient.record.setDataWithAck(searchMetaRecordName, 'populated', true as any)
-      this.logger.debug(`Set ${searchMetaRecordName} as populated`)
-    } catch (e) {
-      this.logger.error(`Error setting entries for searchMetaRecordName ${searchMetaRecordName}`, e)
     }
   }
 }
