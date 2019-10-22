@@ -1,3 +1,11 @@
+export enum LogLevel {
+  DEBUG = 5,
+  INFO = 4,
+  WARN = 3,
+  ERROR = 2,
+  FATAL = 1
+}
+
 import * as crypto from 'crypto'
 const deepstream = require('@deepstream/client')
 import { Client as DeepstreamClient } from '@deepstream/client'
@@ -5,9 +13,9 @@ import { JSONObject, RecordData, EVENT } from '@deepstream/client/dist/constants
 import { RPCResponse } from '@deepstream/client/dist/rpc/rpc-response'
 import { ListenResponse } from '@deepstream/client/dist/util/listener'
 
-import { Logger, LogLevel } from './logger'
+import { StdLogger } from './logger/std-logger'
+import { PinoLogger } from './logger/pino-logger'
 import { MongoDBConnection } from './mongodb/mongodb-connection'
-
 export interface RealtimeSearch {
   whenReady: () => Promise<void>
   stop: () => Promise<void>
@@ -18,7 +26,7 @@ export interface RealtimeSearchCallbacks {
 }
 
 export interface DatabaseClient {
-  getSearch (logger: Logger, dbName: string, query: Query, callbacks: RealtimeSearchCallbacks): RealtimeSearch
+  getSearch (logger: StdLogger | PinoLogger, dbName: string, query: Query, callbacks: RealtimeSearchCallbacks): RealtimeSearch
   start: () => Promise<void>
   stop: () => Promise<void>
 }
@@ -47,6 +55,7 @@ export interface RealtimeSearchConfig {
   listNamePrefix: string,
   metaRecordPrefix: string,
   primaryKey: string,
+  loggerType: 'pino' | 'std',
   logLevel: number,
   database: string,
   deepstreamUrl: string,
@@ -63,6 +72,7 @@ const defaultConfig: RealtimeSearchConfig = {
   listNamePrefix: 'realtime_search/list_',
   metaRecordPrefix: 'realtime_search/meta_',
   primaryKey: 'ds_id',
+  loggerType: 'std',
   logLevel: LogLevel.INFO,
   database: 'deepstream',
   heartbeatInterval: 30000,
@@ -78,11 +88,15 @@ export class Provider {
   private databaseClient!: DatabaseClient
   private config: RealtimeSearchConfig
   private hashReplaceRegex: RegExp
-  private logger: Logger
+  private logger: StdLogger | PinoLogger
 
   constructor (config: Partial<RealtimeSearchConfig>) {
     this.config = {  ...defaultConfig, ...config}
-    this.logger = new Logger(this.config.logLevel)
+    if (this.config.loggerType === 'pino') {
+      this.logger = new PinoLogger(this.config.logLevel)
+    } else {
+      this.logger = new StdLogger(this.config.logLevel)
+    }
     this.hashReplaceRegex = new RegExp(`^${this.config.listNamePrefix}(.*)`)
     this.databaseClient = new MongoDBConnection(this.config, this.logger)
   }

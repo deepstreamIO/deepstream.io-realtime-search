@@ -1,7 +1,8 @@
-import { Logger } from '../logger'
 import { Query, RealtimeSearch, RealtimeSearchCallbacks, QueryOperators } from '../provider'
 import { MongoClient, Collection, ChangeStream, ObjectID, FilterQuery } from 'mongodb'
 import { splitEvery } from 'ramda'
+import { StdLogger } from '../logger/std-logger'
+import { PinoLogger } from '../logger/pino-logger'
 
 export class MongoDBSearch implements RealtimeSearch {
   private collection: Collection
@@ -10,7 +11,7 @@ export class MongoDBSearch implements RealtimeSearch {
   private isReady: boolean = false
 
   constructor (
-    logger: Logger,
+    logger: StdLogger | PinoLogger,
     private database: string,
     private query: Query,
     private callbacks: RealtimeSearchCallbacks,

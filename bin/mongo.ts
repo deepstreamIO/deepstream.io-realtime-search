@@ -1,6 +1,5 @@
 import * as commander from 'commander'
-import { Provider } from '../src/provider'
-import { LogLevel } from '../src/logger'
+import { Provider, LogLevel } from '../src/provider'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -17,6 +16,7 @@ export const mongo = (program: Command) => {
     .option('--mongo-url <mongo-url>', 'Connect to this mongo server')
     .option('--mongo-database <mongo-database>', 'Name of mongo database')
     .option('--ds-url <ds-url>', 'Connect to this deepstream server')
+    .option('--logger-type <logger-type>', 'Log messages with pino or to std')
     .option('--log-level <level>', 'Log messages with this level and above', parseLogLevel)
     .option('--collection-lookup <fileName>', 'JSON file containing model lookups', loadJSON)
     .option('--inspect <url>', 'Enable node inspector')
@@ -46,7 +46,8 @@ function action () {
         connectionUrl: process.env.MONGO_URL || 'mongodb://localhost:27017',
         poolSize: process.env.MONGO_POOL_SIZE || 100,
       },
-      logLevel: LogLevel.DEBUG,
+      loggerType: providerCLI.loggerType || providerCLI.DEEPSTREAM_REALTIME_SEARCH_LOGGER_TYPE || 'std',
+      logLevel: providerCLI.logLevel || providerCLI.DEEPSTREAM_REALTIME_SEARCH_LOG_LEVEL || LogLevel.INFO,
       collectionLookup: providerCLI.collectionLookup
     })
     provider.start()

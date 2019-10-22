@@ -1,12 +1,6 @@
-export enum LogLevel {
-    DEBUG = 5,
-    INFO = 4,
-    WARN = 3,
-    ERROR = 2,
-    FATAL = 1
-}
+import { LogLevel } from '../provider'
 
-export class Logger {
+export class StdLogger {
     constructor (private logLevel: LogLevel) {}
 
     public debug (message: string) {

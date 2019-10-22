@@ -1,9 +1,10 @@
 import { DatabaseClient, RealtimeSearchConfig, RealtimeSearchCallbacks } from '../provider'
-import { Logger } from '../logger'
 import { MongoClient } from 'mongodb'
 import { MongoDBSearch } from './mongodb-search'
 import { Query } from '../provider'
 import { RealtimeSearch } from '../provider'
+import { StdLogger } from '../logger/std-logger'
+import { PinoLogger } from '../logger/pino-logger'
 
 interface MongoDBConfig extends RealtimeSearchConfig {
     connectionConfig: {
@@ -15,7 +16,7 @@ interface MongoDBConfig extends RealtimeSearchConfig {
 export class MongoDBConnection implements DatabaseClient {
     private mongoClient!: MongoClient
 
-    constructor (private config: MongoDBConfig, private logger: Logger) {
+    constructor (private config: MongoDBConfig, private logger: StdLogger | PinoLogger) {
     }
 
     public async start (): Promise<void> {
@@ -33,9 +34,10 @@ export class MongoDBConnection implements DatabaseClient {
         }
     }
 
-    public getSearch (logger: Logger, database: string, query: Query, callbacks: RealtimeSearchCallbacks): RealtimeSearch {
+    public getSearch (logger: StdLogger | PinoLogger, database: string, query: Query, callbacks: RealtimeSearchCallbacks): RealtimeSearch {
       return new MongoDBSearch(logger, database, query, callbacks, this.mongoClient)
     }
+
     public async stop (): Promise<void> {
         await this.mongoClient.close()
     }

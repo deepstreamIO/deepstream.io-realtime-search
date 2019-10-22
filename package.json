@@ -32,12 +32,14 @@
     "@deepstream/types": "^1.0.2",
     "commander": "^3.0.1",
     "mongodb": "^3.3.2",
+    "pino": "^5.13.5",
     "ramda": "^0.26.1"
   },
   "devDependencies": {
     "@deepstream/protobuf": "^1.0.0",
     "@types/cucumber": "^4.0.7",
     "@types/mongodb": "^3.3.1",
+    "@types/pino": "^5.8.12",
     "@types/ramda": "^0.26.21",
     "chai": "^4.2.0",
     "cucumber": "^5.1.0",
