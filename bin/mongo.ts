@@ -46,8 +46,8 @@ function action () {
         connectionUrl: process.env.MONGO_URL || 'mongodb://localhost:27017',
         poolSize: process.env.MONGO_POOL_SIZE || 100,
       },
-      loggerType: providerCLI.loggerType || providerCLI.DEEPSTREAM_REALTIME_SEARCH_LOGGER_TYPE || 'std',
-      logLevel: providerCLI.logLevel || providerCLI.DEEPSTREAM_REALTIME_SEARCH_LOG_LEVEL || LogLevel.INFO,
+      loggerType: providerCLI.loggerType || process.env.DEEPSTREAM_REALTIME_SEARCH_LOGGER_TYPE || 'std',
+      logLevel: providerCLI.logLevel || process.env.DEEPSTREAM_REALTIME_SEARCH_LOG_LEVEL || LogLevel.INFO,
       collectionLookup: providerCLI.collectionLookup
     })
     provider.start()
