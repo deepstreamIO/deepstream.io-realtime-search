@@ -9,4 +9,4 @@ RUN npm install --production
 # - Copy useful files
 COPY . .
 
-CMD ["npm", "run", "start", "--", "help"]
+ENTRYPOINT ["npm", "run", "start", "--"]
