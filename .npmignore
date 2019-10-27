@@ -1,0 +1,10 @@
+.nyc_output
+coverage
+node_modules
+scripts
+test-e2e
+.dockerignore
+.travis.yml
+Dockerfile
+tsconfig.json
+tslint.json
