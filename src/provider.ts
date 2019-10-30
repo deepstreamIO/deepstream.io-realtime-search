@@ -48,7 +48,7 @@ export interface Query {
   query: Array<[string, keyof QueryOperators, any] | [string, QueryOperators.IN, any[]]>,
   order?: any,
   limit?: number,
-  meta?: { [index: string]: any }
+  meta?: { [index: string]: string | number }
 }
 
 export interface RealtimeSearchConfig {
@@ -64,7 +64,8 @@ export interface RealtimeSearchConfig {
   heartbeatInterval: number,
   hashSeed: number,
   rpcName: string,
-  collectionLookup?: { [index: string]: string }
+  collectionLookup?: { [index: string]: string },
+  nativeQuery: boolean
 }
 
 const defaultConfig: RealtimeSearchConfig = {
@@ -79,7 +80,8 @@ const defaultConfig: RealtimeSearchConfig = {
   hashSeed: 0xcafebccc,
   deepstreamUrl: 'ws://localhost:6020',
   deepstreamCredentials: {},
-  connectionConfig: {}
+  connectionConfig: {},
+  nativeQuery: false
 }
 
 export class Provider {
@@ -149,7 +151,11 @@ export class Provider {
     })
 
     this.deepstreamClient.on('error', (error: Error, event: EVENT) => {
-      this.logger.fatal(`Client error: ${error.message}`, event as any)
+      if (error) {
+        this.logger.fatal(`Client error: ${error.message}`, event as any)
+      } else {
+        this.logger.fatal('Missing Client error!', event as any)
+      }
     })
 
     try {
@@ -172,6 +178,13 @@ export class Provider {
 
         if (this.validateQuery(query) === false) {
           return response.error('Invalid query parameters, please refer to provider logs')
+        }
+
+        if (query.meta) {
+          Object.keys(query.meta).forEach((key: any) => {
+            // @ts-ignore
+            query.query[key] = query.meta[key]
+          })
         }
 
         if (this.config.collectionLookup && this.config.collectionLookup[query.table]) {

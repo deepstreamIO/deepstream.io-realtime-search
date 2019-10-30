@@ -20,7 +20,7 @@ export class MongoDBConnection implements DatabaseClient {
     }
 
     public async start (): Promise<void> {
-        this.logger.info('Initialising MongoDB Connection')
+        this.logger.info('Initializing MongoDB Connection')
         try {
           this.mongoClient = await MongoClient.connect(this.config.connectionConfig.connectionUrl, {
             useNewUrlParser: true,
@@ -35,7 +35,7 @@ export class MongoDBConnection implements DatabaseClient {
     }
 
     public getSearch (logger: StdLogger | PinoLogger, database: string, query: Query, callbacks: RealtimeSearchCallbacks): RealtimeSearch {
-      return new MongoDBSearch(logger, database, query, callbacks, this.mongoClient)
+      return new MongoDBSearch(logger, database, query, callbacks, this.mongoClient, this.config.nativeQuery)
     }
 
     public async stop (): Promise<void> {

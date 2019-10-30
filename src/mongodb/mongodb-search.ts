@@ -7,17 +7,27 @@ import { PinoLogger } from '../logger/pino-logger'
 export class MongoDBSearch implements RealtimeSearch {
   private collection: Collection
   private changeStream: ChangeStream
-  private mongoQuery: FilterQuery<any>
+  private mongoQuery: FilterQuery<any> = this.query.query
   private isReady: boolean = false
 
   constructor (
-    logger: StdLogger | PinoLogger,
+    private logger: StdLogger | PinoLogger,
     private database: string,
     private query: Query,
     private callbacks: RealtimeSearchCallbacks,
     private mongoClient: MongoClient,
-    ) {
-    this.mongoQuery = convertToMongoQuery({}, this.query.query)
+    nativeQuery: boolean
+  ) {
+    if (!nativeQuery) {
+      this.mongoQuery = this.convertToMongoQuery({}, this.query.query)
+    } else {
+      Object.keys(this.mongoQuery).forEach((key: string) => {
+        if (ObjectID.isValid(this.mongoQuery[key])) {
+          // @ts-ignore
+          this.mongoQuery[key] = new ObjectID(this.mongoQuery[key])
+        }
+      })
+    }
     const db = this.mongoClient.db(this.database)
     this.collection = db.collection(this.query.table)
     this.changeStream = this.collection.watch([], {})
@@ -48,23 +58,27 @@ export class MongoDBSearch implements RealtimeSearch {
     const entries = result.map((r) => `${r._id}`)
     this.callbacks.onResultsChanged(entries)
   }
-}
 
-const convertToMongoQuery = (result: any, condition: any[]): any => {
-  if (typeof condition[0] === 'string') {
-    if (condition.length === 3) {
-      return mongonize(result, condition)
+  private convertToMongoQuery (result: any, condition: any[]): any {
+    if (typeof condition[0] === 'string') {
+      if (condition.length === 3) {
+        return mongonize(result, condition)
+      }
+      if (condition.length > 3) {
+        result.$or = splitEvery(3, condition).map((c) => this.convertToMongoQuery({}, c))
+        return result
+      }
     }
-    if (condition.length > 3) {
-      result.$or = splitEvery(3, condition).map((c) => convertToMongoQuery({}, c))
+
+    try {
+      condition.reduce((r, c) => {
+        return this.convertToMongoQuery(r, c)
+      }, result)
       return result
+    } catch (error) {
+      this.logger.error('Received an invalid search', error)
     }
   }
-
-  condition.reduce((r, c) => {
-    return convertToMongoQuery(r, c)
-  }, result)
-  return result
 }
 
 const mongonize = (result: any = {}, condition: any) => {

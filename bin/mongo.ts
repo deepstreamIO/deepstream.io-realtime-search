@@ -48,7 +48,8 @@ function action () {
       },
       loggerType: providerCLI.loggerType || process.env.DEEPSTREAM_REALTIME_SEARCH_LOGGER_TYPE || 'std',
       logLevel: providerCLI.logLevel || process.env.DEEPSTREAM_REALTIME_SEARCH_LOG_LEVEL || LogLevel.INFO,
-      collectionLookup: providerCLI.collectionLookup
+      collectionLookup: providerCLI.collectionLookup,
+      nativeQuery: providerCLI.nativeQuery
     })
     provider.start()
     process
