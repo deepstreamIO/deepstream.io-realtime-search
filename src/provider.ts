@@ -7,8 +7,7 @@ export enum LogLevel {
 }
 
 import * as crypto from 'crypto'
-const deepstream = require('@deepstream/client')
-import { Client as DeepstreamClient } from '@deepstream/client'
+import { DeepstreamClient } from '@deepstream/client'
 import { JSONObject, RecordData, EVENT } from '@deepstream/client/dist/constants'
 import { RPCResponse } from '@deepstream/client/dist/rpc/rpc-response'
 import { ListenResponse } from '@deepstream/client/dist/util/listener'
@@ -144,7 +143,7 @@ export class Provider {
       this.logger.fatal('Missing configuration parameter deepstreamCredentials')
     }
 
-    this.deepstreamClient = deepstream(this.config.deepstreamUrl, {
+    this.deepstreamClient = new DeepstreamClient(this.config.deepstreamUrl, {
       offlineEnabled: false,
       maxReconnectAttempts: Infinity,
       maxReconnectInterval: 5000
