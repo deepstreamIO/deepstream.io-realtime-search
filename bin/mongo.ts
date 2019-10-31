@@ -20,6 +20,7 @@ export const mongo = (program: Command) => {
     .option('--log-level <level>', 'Log messages with this level and above', parseLogLevel)
     .option('--collection-lookup <fileName>', 'JSON file containing model lookups', loadJSON)
     .option('--inspect <url>', 'Enable node inspector')
+    .option('--native-query', 'Use native mongodb query syntax')
     .action(action)
 }
 
