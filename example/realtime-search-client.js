@@ -8,7 +8,7 @@ async function app () {
     // Setting them sync isn't best practice but makes for prettier demo code
     await client.record.setDataWithAck('user/12345', { name: 'Bob', age: 30 })
     await client.record.setDataWithAck('user/54321', { name: 'John', age: 60 })
-    await client.record.setDataWithAck('user/32154', { name: 'Joseph', age: 12 })
+    await client.record.setDataWithAck('user/32154', { name: 'Joseph', age: 35 })
 
     // And now we search!
 

@@ -1,3 +1,5 @@
+serverName: realtime-search-example
+
 record:
   # I would recommend excluding any object generated via listening from storage objects from storage
   # since they can usually be computed
@@ -10,3 +12,22 @@ storage:
     connectionString: ${MONGO_URL}
     database: ${MONGO_DATABASE}
     splitChar: /
+
+permission:
+  type: config
+  options:
+    # Permissions file
+    permissions: fileLoad(permissions.yml)
+    # Amount of times nested cross-references will be loaded. Avoids endless loops
+    maxRuleIterations: 3
+    # PermissionResults are cached to increase performance. Lower number means more loading
+    cacheEvacuationInterval: 60000
+
+# Authentication
+auth:
+  - type: file
+    options:
+      # Path to the user file. Can be json, js or yml
+      users: fileLoad(users.yml)
+
+  - type: none

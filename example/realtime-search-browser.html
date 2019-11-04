@@ -5,12 +5,13 @@
             src="https://cdn.deepstream.io/js/client/latest/ds.min.js"
         ></script>
         <style>
-            .results {
-
-            }
-
-            .result {
-
+            .user {
+                display: block;
+                border: 1px solid #ccc;
+                padding: 10px;
+                border-radius: 2px;
+                width: 100px;
+                margin-bottom: 20px;
             }
         </style>
     </head>
@@ -18,11 +19,11 @@
         <template id="user-template">
             <li class="user">
                 <div class="name">
-                    <label>name</label>
+                    <label>Name:</label>
                     <span></span>
                 </div>
                 <div class="age">
-                    <label>age</label>
+                    <label>Age:</label>
                     <span></span>
                 </div>
             </li>
@@ -60,13 +61,13 @@
                     const users = document.createElement('ul')
                     users.className = 'users'
 
-                    records.forEach(user => {
+                    records.forEach(record => {
                         const template = document.querySelector("#user-template");
                         const clone = document.importNode(template.content, true);
                         const elem = clone.children[0];
-                        console.log(user)
-                        elem.querySelector('.name span').innerText = user.get('name')
-                        elem.querySelector('.age span').innerText = user.get('age')
+                        elem.setAttribute('data-record-id', record.name)
+                        elem.querySelector('.name span').innerText = record.get('name')
+                        elem.querySelector('.age span').innerText = record.get('age')
                         users.append(elem)
                     })
                     
@@ -82,12 +83,15 @@
                     await record.whenReady()
                     record.subscribe(render, true)
                     records.set(recordName, record)
+                    console.log('added', recordName)
                 }
 
                 const discardRecord = (recordName) => {
                     const record = records.get(recordName)
                     record.discard()
                     records.delete(recordName)
+                    render()
+                    console.log('discarded', recordName)
                 }
 
                 const resultList = client.record.getList(`realtime_search/list_${hash}`)
