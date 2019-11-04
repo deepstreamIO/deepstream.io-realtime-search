@@ -71,7 +71,7 @@ const defaultConfig: RealtimeSearchConfig = {
   rpcName: 'realtime_search',
   listNamePrefix: 'realtime_search/list_',
   metaRecordPrefix: 'realtime_search/meta_',
-  primaryKey: 'ds_id',
+  primaryKey: 'ds_key',
   loggerType: 'std',
   logLevel: LogLevel.INFO,
   database: 'deepstream',
