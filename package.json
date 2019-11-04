@@ -1,6 +1,6 @@
 {
   "name": "@deepstream/realtime-search",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "A realtime search provider for databases using changefeeds",
   "bin": "dist/bin/realtime-search",
   "scripts": {
