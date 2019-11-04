@@ -1,0 +1,102 @@
+<html>
+    <head>
+        <script
+            type="text/javascript"
+            src="https://cdn.deepstream.io/js/client/latest/ds.min.js"
+        ></script>
+        <style>
+            .results {
+
+            }
+
+            .result {
+
+            }
+        </style>
+    </head>
+    <body>
+        <template id="user-template">
+            <li class="user">
+                <div class="name">
+                    <label>name</label>
+                    <span></span>
+                </div>
+                <div class="age">
+                    <label>age</label>
+                    <span></span>
+                </div>
+            </li>
+        </template>
+        <ul class="users">
+        </ul>
+        <script type="text/javascript">
+            async function application () {
+                const client = new DeepstreamClient('ws://localhost:6020')
+                await client.login()
+
+                /**
+                 * In order to do the search we call an RPC with the table and query parameters
+                 * The query parameters are tuples of three:
+                 * 
+                 * [fieldName, operator, value]
+                 * 
+                 * Where the operators can be one of:
+                 * 
+                 * [ eq, ne, match, gt, ge, lt, le, in, contains ]
+                 * 
+                 * And you can AND them together by just having more:
+                 * 
+                 * [[fieldName, operator, value], [fieldName, operator, value], [fieldName, operator, value]]
+                 */
+                const hash = await client.rpc.make('realtime_search', {
+                    table: 'user',
+                    // age greater than equal to 30
+                    query: [['age', 'ge', 30]]
+                })
+
+                const records = new Map()
+
+                const render = () => {
+                    const users = document.createElement('ul')
+                    users.className = 'users'
+
+                    records.forEach(user => {
+                        const template = document.querySelector("#user-template");
+                        const clone = document.importNode(template.content, true);
+                        const elem = clone.children[0];
+                        console.log(user)
+                        elem.querySelector('.name span').innerText = user.get('name')
+                        elem.querySelector('.age span').innerText = user.get('age')
+                        users.append(elem)
+                    })
+                    
+                    if (document.querySelector(".users")) {
+                        document
+                        .querySelector(".users")
+                        .replaceWith(users)
+                    }
+                }
+
+                const createRecord = async (recordName) => {
+                    const record = client.record.getRecord(recordName)
+                    await record.whenReady()
+                    record.subscribe(render, true)
+                    records.set(recordName, record)
+                }
+
+                const discardRecord = (recordName) => {
+                    const record = records.get(recordName)
+                    record.discard()
+                    records.delete(recordName)
+                }
+
+                const resultList = client.record.getList(`realtime_search/list_${hash}`)
+                await resultList.whenReady()
+                resultList.getEntries().forEach(createRecord)
+                resultList.on('entry-added', createRecord)
+                resultList.on('entry-removed', discardRecord)
+            }
+            application()
+        </script>
+    </body>
+</html>

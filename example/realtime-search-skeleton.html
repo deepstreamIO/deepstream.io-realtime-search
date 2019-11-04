@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <script
+            type="text/javascript"
+            src="https://cdn.deepstream.io/js/client/latest/ds.min.js"
+        ></script>
+        <style>
+            .results {
+
+            }
+
+            .result {
+
+            }
+        </style>
+    </head>
+    <body>
+        <template id="user-template">
+            <li class="user">
+                <div class="name"></div>
+                <div class="age"></div>
+            </li>
+        </template>
+        <ul class="results">
+        </ul>
+        <script type="text/javascript">
+            async function application () {
+                const deepstream = new DeepstreamClient('ws://localhost:6020')
+            }
+            application()
+        </script>
+    </body>
+</html>

@@ -16,6 +16,7 @@ export class MongoDBSearch implements RealtimeSearch {
     private query: Query,
     private callbacks: RealtimeSearchCallbacks,
     private mongoClient: MongoClient,
+    private primaryKey: string,
     nativeQuery: boolean
   ) {
     if (!nativeQuery) {
@@ -54,8 +55,8 @@ export class MongoDBSearch implements RealtimeSearch {
   }
 
   private async runQuery () {
-    const result = await this.collection.find(this.mongoQuery, { projection: { _id: 1 } }).toArray()
-    const entries = result.map((r) => `${r._id}`)
+    const result = await this.collection.find(this.mongoQuery, { projection: { [this.primaryKey]: 1 } }).toArray()
+    const entries = result.map((r) => r[this.primaryKey])
     this.callbacks.onResultsChanged(entries)
   }
 

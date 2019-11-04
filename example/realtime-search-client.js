@@ -1,10 +1,9 @@
-const deepstream =  require('@deepstream/client')
+const { DeepstreamClient } =  require('@deepstream/client')
 
 async function app () {
-    const client = deepstream('ws://localhost:6020')
+    const client = new DeepstreamClient('ws://localhost:6020')
     await client.login()
 
-    console.log('logged in')
     // Let us set some dummy data to filter one later
     // Setting them sync isn't best practice but makes for prettier demo code
     await client.record.setDataWithAck('user/12345', { name: 'Bob', age: 30 })
@@ -30,13 +29,19 @@ async function app () {
     const hash = await client.rpc.make('realtime_search', {
         table: 'user',
         // age greater than equal to 30
-        query: [['age', 'ge', 30]]
+        query: [['age', 'gt', 30]]
     })
-
 
     const resultList = client.record.getList(`realtime_search/list_${hash}`)
     resultList.subscribe(results => {
-        console.log(results)
-    })
+        // Results
+        console.log('>', results)
+    }, true)
+
+    // Let us change a users age, if everything is working correctly 
+    // it should trigger the above console almost instantly
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    await client.record.setDataWithAck('user/32154', { name: 'Joseph', age: 50 })
 }
+
 app()

@@ -15,6 +15,7 @@ export const mongo = (program: Command) => {
     .description('start a mongodb realtime search provider')
     .option('--mongo-url <mongo-url>', 'Connect to this mongo server')
     .option('--mongo-database <mongo-database>', 'Name of mongo database')
+    .option('--primary-key <primary-key>', 'Primary key used on deepstream objects')
     .option('--ds-url <ds-url>', 'Connect to this deepstream server')
     .option('--logger-type <logger-type>', 'Log messages with pino or to std')
     .option('--log-level <level>', 'Log messages with this level and above', parseLogLevel)
@@ -50,7 +51,8 @@ function action () {
       loggerType: providerCLI.loggerType || process.env.DEEPSTREAM_REALTIME_SEARCH_LOGGER_TYPE || 'std',
       logLevel: providerCLI.logLevel || process.env.DEEPSTREAM_REALTIME_SEARCH_LOG_LEVEL || LogLevel.INFO,
       collectionLookup: providerCLI.collectionLookup,
-      nativeQuery: providerCLI.nativeQuery
+      nativeQuery: providerCLI.nativeQuery,
+      primaryKey: process.env.MONGO_PRIMARY_KEY || 'ds_id'
     })
     provider.start()
     process

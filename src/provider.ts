@@ -64,7 +64,7 @@ export interface RealtimeSearchConfig {
   hashSeed: number,
   rpcName: string,
   collectionLookup?: { [index: string]: string },
-  nativeQuery: boolean
+  nativeQuery: boolean,
 }
 
 const defaultConfig: RealtimeSearchConfig = {

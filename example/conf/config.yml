@@ -1,5 +1,12 @@
+record:
+  # I would recommend excluding any object generated via listening from storage objects from storage
+  # since they can usually be computed
+  storageExclusionPrefixes:
+    - deepstream_search/
+
 storage:
   name: mongodb
   options:
-    connectionString: mongodb://localhost:27017/deepstream
-    db: deepstream
+    connectionString: ${MONGO_URL}
+    database: ${MONGO_DATABASE}
+    splitChar: /

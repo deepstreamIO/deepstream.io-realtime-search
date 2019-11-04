@@ -20,22 +20,24 @@ services:
 
   deepstream:
     image: deepstreamio/deepstream.io:latest
+    command: 'deepstream start -c /etc/deepstream/conf/config.yml'
     environment:
-      - MONGO_URL=mongodb://mongo
+      - MONGO_URL=mongodb://mongo/deepstream
       - MONGO_DATABASE=deepstream
     volumes:
-      - ./conf:/etc/deepstream/conf
+      - ./conf:/etc/deepstream/conf:ro
     ports:
       - 6020:6020
     depends_on:
       - mongo
 
   realtime-search:
-    image: deepstreamio/realtime-search
+    image: deepstreamio/realtime-search:latest-alpine
     command: 'mongo'
     environment:
       - DEEPSTREAM_URL=ws://deepstream:6020
-      - MONGO_URL=mongodb://mongo
+      - MONGO_DATABASE=deepstream
+      - MONGO_URL=mongodb://mongo/deepstream
     depends_on:
       - deepstream
       - mongo
