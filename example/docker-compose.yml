@@ -38,6 +38,7 @@ services:
       - DEEPSTREAM_URL=ws://deepstream:6020
       - MONGO_DATABASE=deepstream
       - MONGO_URL=mongodb://mongo/deepstream
+      - MONGO_PRIMARY_KEY=ds_key
     depends_on:
       - deepstream
       - mongo

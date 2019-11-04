@@ -17,6 +17,7 @@ export class MongoDBSearch implements RealtimeSearch {
     private callbacks: RealtimeSearchCallbacks,
     private mongoClient: MongoClient,
     private primaryKey: string,
+    private excludeTablePrefix: boolean,
     nativeQuery: boolean
   ) {
     if (!nativeQuery) {
@@ -57,7 +58,12 @@ export class MongoDBSearch implements RealtimeSearch {
 
   private async runQuery () {
     const result = await this.collection.find(this.mongoQuery, { projection: { [this.primaryKey]: 1 } }).toArray()
-    const entries = result.map((r) => r[this.primaryKey])
+    let entries = null
+    if (this.excludeTablePrefix) {
+      entries = result.map((r) => r[this.primaryKey])
+    } else {
+      entries = result.map((r) => `${this.query.table}/${r[this.primaryKey]}`)
+    }
     this.callbacks.onResultsChanged(entries)
   }
 

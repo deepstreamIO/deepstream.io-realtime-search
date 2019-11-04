@@ -20,6 +20,7 @@ export const mongo = (program: Command) => {
     .option('--logger-type <logger-type>', 'Log messages with pino or to std')
     .option('--log-level <level>', 'Log messages with this level and above', parseLogLevel)
     .option('--collection-lookup <fileName>', 'JSON file containing model lookups', loadJSON)
+    .option('--exclude-table-prefix', "Don't add the table prefix to results, this means you can't directly use named to load records")
     .option('--inspect <url>', 'Enable node inspector')
     .option('--native-query', 'Use native mongodb query syntax')
     .action(action)
@@ -52,7 +53,8 @@ function action () {
       logLevel: providerCLI.logLevel || process.env.DEEPSTREAM_REALTIME_SEARCH_LOG_LEVEL || LogLevel.INFO,
       collectionLookup: providerCLI.collectionLookup,
       nativeQuery: providerCLI.nativeQuery,
-      primaryKey: process.env.MONGO_PRIMARY_KEY || 'ds_id'
+      primaryKey: process.env.MONGO_PRIMARY_KEY || 'ds_id',
+      excludeTablePrefix: providerCLI.excludeTablePrefix
     })
     provider.start()
     process

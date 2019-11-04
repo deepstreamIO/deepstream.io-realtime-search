@@ -65,6 +65,7 @@ export interface RealtimeSearchConfig {
   rpcName: string,
   collectionLookup?: { [index: string]: string },
   nativeQuery: boolean,
+  excludeTablePrefix: boolean
 }
 
 const defaultConfig: RealtimeSearchConfig = {
@@ -80,7 +81,8 @@ const defaultConfig: RealtimeSearchConfig = {
   deepstreamUrl: 'ws://localhost:6020',
   deepstreamCredentials: {},
   connectionConfig: {},
-  nativeQuery: false
+  nativeQuery: false,
+  excludeTablePrefix: false
 }
 
 export class Provider {
