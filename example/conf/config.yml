@@ -1,0 +1,5 @@
+storage:
+  name: mongodb
+  options:
+    connectionString: mongodb://localhost:27017/deepstream
+    db: deepstream

@@ -1,0 +1,41 @@
+version: '3.3'
+services:
+  mongo:
+    image: mongo:3.6.8
+    ports:
+      - 27017:27017
+    command: mongod --storageEngine wiredTiger --smallfiles --replSet rs0 --logpath=/dev/null # --quiet
+
+    # this exists to configure the mongo instance to act like a single-node
+    # replica set. This is needed to get an oplog collection running so that we can
+    # tail it to keep deepstream in sync. Once the replica set is running,
+    # this container will exit peacefully.
+  database-replica-set:
+    image: mongo:3.6.8
+    volumes:
+      - ./scripts:/scripts
+    entrypoint: ['/scripts/local-replica-set.sh']
+    depends_on:
+      - mongo
+
+  deepstream:
+    image: deepstreamio/deepstream.io:latest
+    environment:
+      - MONGO_URL=mongodb://mongo
+      - MONGO_DATABASE=deepstream
+    volumes:
+      - ./conf:/etc/deepstream/conf
+    ports:
+      - 6020:6020
+    depends_on:
+      - mongo
+
+  realtime-search:
+    image: deepstreamio/realtime-search
+    command: 'mongo'
+    environment:
+      - DEEPSTREAM_URL=ws://deepstream:6020
+      - MONGO_URL=mongodb://mongo
+    depends_on:
+      - deepstream
+      - mongo
