@@ -17,6 +17,7 @@ export const mongo = (program: Command) => {
     .option('--mongo-database <mongo-database>', 'Name of mongo database')
     .option('--primary-key <primary-key>', 'Primary key used on deepstream objects')
     .option('--ds-url <ds-url>', 'Connect to this deepstream server')
+    .option('--ds-credentials <ds-credentials>', 'Deepstream credentials login')
     .option('--logger-type <logger-type>', 'Log messages with pino or to std')
     .option('--log-level <level>', 'Log messages with this level and above', parseLogLevel)
     .option('--collection-lookup <fileName>', 'JSON file containing model lookups', loadJSON)
@@ -39,11 +40,23 @@ function action () {
     inspector.open(port, host)
   }
 
+  let deepstreamCredentials = {}
+  if (process.env.DEEPSTREAM_PASSWORD) {
+    deepstreamCredentials = { backendSecret: process.env.DEEPSTREAM_PASSWORD || 'deepstream_password' }
+  } else if (providerCLI.dsCredentials || process.env.DEEPSTREAM_CREDENTIALS) {
+    try {
+      deepstreamCredentials = JSON.parse(providerCLI.dsCredentials || process.env.DEEPSTREAM_CREDENTIALS)
+    } catch (e) {
+      console.error('Invalid deepstream credentials provided')
+      process.exit(1)
+    }
+  }
+
   try {
     const provider = new Provider({
       database: providerCLI.mongoDatabase || process.env.MONGO_DATABASE || 'deepstream',
       deepstreamUrl: providerCLI.deepstreamUrl || process.env.DEEPSTREAM_URL || 'ws://localhost:6020/deepstream',
-      deepstreamCredentials: { backendSecret: process.env.DEEPSTREAM_PASSWORD || 'deepstream_password' },
+      deepstreamCredentials,
       connectionConfig: {
         connectionUrl: process.env.MONGO_URL || 'mongodb://localhost:27017',
         poolSize: process.env.MONGO_POOL_SIZE || 100,
