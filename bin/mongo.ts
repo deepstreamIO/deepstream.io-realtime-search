@@ -53,7 +53,7 @@ function action () {
       logLevel: providerCLI.logLevel || process.env.DEEPSTREAM_REALTIME_SEARCH_LOG_LEVEL || LogLevel.INFO,
       collectionLookup: providerCLI.collectionLookup,
       nativeQuery: providerCLI.nativeQuery,
-      primaryKey: process.env.MONGO_PRIMARY_KEY || 'ds_id',
+      primaryKey: process.env.MONGO_PRIMARY_KEY || 'ds_key',
       excludeTablePrefix: providerCLI.excludeTablePrefix
     })
     provider.start()
