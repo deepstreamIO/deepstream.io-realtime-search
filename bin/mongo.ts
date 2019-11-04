@@ -43,7 +43,10 @@ function action () {
 
   let deepstreamCredentials = {}
   if (process.env.DEEPSTREAM_PASSWORD) {
-    deepstreamCredentials = { backendSecret: process.env.DEEPSTREAM_PASSWORD || 'deepstream_password' }
+    deepstreamCredentials = {
+      username: 'realtime_search',
+      password: process.env.DEEPSTREAM_PASSWORD || 'deepstream_password'
+    }
   } else if (providerCLI.dsCredentials || process.env.DEEPSTREAM_CREDENTIALS) {
     try {
       deepstreamCredentials = JSON.parse(providerCLI.dsCredentials || process.env.DEEPSTREAM_CREDENTIALS)
