@@ -28,6 +28,7 @@ export class MongoDBSearch implements RealtimeSearch {
         }
       })
     }
+
     const db = this.mongoClient.db(this.database)
     this.collection = db.collection(this.query.table)
     this.changeStream = this.collection.watch([], {})
@@ -85,7 +86,7 @@ const mongonize = (result: any = {}, condition: any) => {
   const [field, operator] = condition
   let value = condition[2]
 
-  if (ObjectID.isValid(value)) {
+  if (ObjectID.isValid(value) && value.toString().length === 24) {
     value = new ObjectID(value)
   }
   switch (operator) {
