@@ -35,7 +35,7 @@ export class MongoDBConnection implements DatabaseClient {
     }
 
     public getSearch (logger: StdLogger | PinoLogger, database: string, query: Query, callbacks: RealtimeSearchCallbacks): RealtimeSearch {
-      return new MongoDBSearch(logger, database, query, callbacks, this.mongoClient, this.config.primaryKey, this.config.nativeQuery, this.config.excludeTablePrefix)
+      return new MongoDBSearch(logger, database, query, callbacks, this.mongoClient, this.config.primaryKey, this.config.excludeTablePrefix, this.config.nativeQuery)
     }
 
     public async stop (): Promise<void> {

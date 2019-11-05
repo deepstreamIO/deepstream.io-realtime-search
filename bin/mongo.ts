@@ -68,9 +68,9 @@ function action () {
       loggerType: providerCLI.loggerType || process.env.DEEPSTREAM_REALTIME_SEARCH_LOGGER_TYPE || 'std',
       logLevel: providerCLI.logLevel || process.env.DEEPSTREAM_REALTIME_SEARCH_LOG_LEVEL || LogLevel.INFO,
       collectionLookup: providerCLI.collectionLookup,
-      nativeQuery: providerCLI.nativeQuery,
+      nativeQuery: providerCLI.nativeQuery || false,
       primaryKey: process.env.MONGO_PRIMARY_KEY || 'ds_key',
-      excludeTablePrefix: providerCLI.excludeTablePrefix
+      excludeTablePrefix: providerCLI.excludeTablePrefix || false
     })
     provider.start()
     process
