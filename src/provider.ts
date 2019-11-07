@@ -44,10 +44,7 @@ export enum QueryOperators {
 
 export interface Query {
   table: string,
-  query: Array<[string, keyof QueryOperators, any] | [string, QueryOperators.IN, any[]]>,
-  order?: any,
-  limit?: number,
-  meta?: { [index: string]: string | number }
+  query: Array<[string, keyof QueryOperators, any] | [string, QueryOperators.IN, any[]]> | any,
 }
 
 export interface RealtimeSearchConfig {
@@ -110,7 +107,7 @@ export class Provider {
    */
   public async start () {
     await this.databaseClient.start()
-    await this.initialiseDeepstreamClient()
+    await this.initializeDeepstreamClient()
 
     this.setupRPC()
 
@@ -123,7 +120,7 @@ export class Provider {
 
   /**
    * Stops the provider. Closes the deepstream
-   * connection and disconnects from mongodb
+   * connection and disconnects from db
    */
   public async stop () {
     try {
@@ -134,8 +131,8 @@ export class Provider {
     }
   }
 
-  private async initialiseDeepstreamClient () {
-    this.logger.info('Initialising Deepstream connection')
+  private async initializeDeepstreamClient () {
+    this.logger.info('Initializing Deepstream connection')
 
     if (!this.config.deepstreamUrl) {
       this.logger.fatal("Can't connect to deepstream, neither deepstreamClient nor deepstreamUrl were provided")
@@ -181,11 +178,12 @@ export class Provider {
           return response.error('Invalid query parameters, please refer to provider logs')
         }
 
-        if (query.meta) {
-          Object.keys(query.meta).forEach((key: any) => {
-            // @ts-ignore
-            query.query[key] = query.meta[key]
-          })
+        // Native query is a mongodb specific thing for now, this just makes it escape quicker
+        if (this.config.nativeQuery) {
+          if (query.query.$query === undefined) {
+            this.logger.error('Must provide your query in a "{ $query, $orderby, $... }" format')
+            return response.error('Must provide your query in a "{ $query, $orderby, $... }" format')
+          }
         }
 
         if (this.config.collectionLookup && this.config.collectionLookup[query.table]) {
@@ -334,12 +332,6 @@ export class Provider {
       this.logger.error(`Missing parameter "query": ${JSON.stringify(query)}`)
       return false
     }
-
-    // if ((query.order && !query.limit) || (query.limit && !query.order)) {
-    //   // XOR
-    //   this.logger.error(`Must specify both "order" and "limit" together: ${JSON.stringify(query)}`)
-    //   return false
-    // }
 
     // for(let i = 0; i < query.query.length; i++) {
     //   const condition = query.query[i]

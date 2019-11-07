@@ -23,10 +23,13 @@ export class MongoDBSearch implements RealtimeSearch {
     if (!nativeQuery) {
       this.mongoQuery = this.convertToMongoQuery({}, this.query.query)
     } else {
-      Object.keys(this.mongoQuery).forEach((key: string) => {
-        if (ObjectID.isValid(this.mongoQuery[key])) {
+      this.mongoQuery = { $returnKey: true, ...this.mongoQuery }
+
+      Object.keys(this.mongoQuery.$query).forEach((key: string) => {
+        // We check for the same length as all numbers are valid
+        if (ObjectID.isValid(this.mongoQuery.$query[key]) && this.mongoQuery.$query[key].length === 24) {
           // @ts-ignore
-          this.mongoQuery[key] = new ObjectID(this.mongoQuery[key])
+          this.mongoQuery.$query[key] = new ObjectID(this.mongoQuery.$query[key])
         }
       })
     }
@@ -57,14 +60,18 @@ export class MongoDBSearch implements RealtimeSearch {
   }
 
   private async runQuery () {
-    const result = await this.collection.find(this.mongoQuery, { projection: { [this.primaryKey]: 1 } }).toArray()
-    let entries = null
-    if (this.excludeTablePrefix) {
-      entries = result.map((r) => r[this.primaryKey])
-    } else {
-      entries = result.map((r) => `${this.query.table}/${r[this.primaryKey]}`)
+    try {
+      const result = await this.collection.find(this.mongoQuery).toArray()
+      let entries = null
+      if (this.excludeTablePrefix) {
+        entries = result.map((r) => r[this.primaryKey])
+      } else {
+        entries = result.map((r) => `${this.query.table}/${r[this.primaryKey]}`)
+      }
+      this.callbacks.onResultsChanged(entries)
+    } catch (error) {
+      this.logger.error('Error running query', error)
     }
-    this.callbacks.onResultsChanged(entries)
   }
 
   private convertToMongoQuery (result: any, condition: any[]): any {

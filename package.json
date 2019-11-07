@@ -3,7 +3,8 @@
   "version": "0.1.14",
   "description": "A realtime search provider for databases using changefeeds",
   "bin": "dist/bin/realtime-search",
-  "scripts": {
+  "main": "dist/src/provider.js",
+  "scripts": { 
     "start": "node dist/bin/realtime-search",
     "start:dev": "ts-node bin/realtime-search",
     "tsc": "sh scripts/tsc.sh",
