@@ -3,6 +3,7 @@ import { MongoClient, Collection, ChangeStream, ObjectID, FilterQuery } from 'mo
 import { splitEvery } from 'ramda'
 import { StdLogger } from '../logger/std-logger'
 import { PinoLogger } from '../logger/pino-logger'
+import { objectIDConvertor } from './util'
 
 export class MongoDBSearch implements RealtimeSearch {
   private collection: Collection
@@ -24,14 +25,8 @@ export class MongoDBSearch implements RealtimeSearch {
       this.mongoQuery = this.convertToMongoQuery({}, this.query.query)
     } else {
       this.mongoQuery = { $returnKey: true, ...this.mongoQuery }
-
-      Object.keys(this.mongoQuery.$query).forEach((key: string) => {
-        // We check for the same length as all numbers are valid
-        if (ObjectID.isValid(this.mongoQuery.$query[key]) && this.mongoQuery.$query[key].length === 24) {
-          // @ts-ignore
-          this.mongoQuery.$query[key] = new ObjectID(this.mongoQuery.$query[key])
-        }
-      })
+      this.logger.debug(`native query: ${JSON.stringify(this.mongoQuery)}`)
+      this.mongoQuery.$query = objectIDConvertor({}, this.mongoQuery.$query)
     }
 
     const db = this.mongoClient.db(this.database)
