@@ -1,0 +1,40 @@
+presence:
+  "*":
+    allow: true
+event:
+  "*":
+    publish: true
+    subscribe: true
+    listen: true
+record:
+  "*":
+    create: false
+    write: false
+    read: false
+    delete: false
+    listen: false
+    notify: false
+  "user/*":
+    create: true
+    read: true
+    write: true
+    delete: true
+  "realtime_search/list_*":
+    create: true
+    write: "user.data.isRealtimeSearch === true"
+    read: true
+    delete: "user.data.isRealtimeSearch === true"
+    listen: "user.data.isRealtimeSearch === true"
+  "realtime_search/meta_*":
+    create: "user.data.isRealtimeSearch === true"
+    write: "user.data.isRealtimeSearch === true"
+    read: "user.data.isRealtimeSearch === true"
+    delete: "user.data.isRealtimeSearch === true"
+rpc:
+  "*":
+    provide: false
+    request: false
+  "realtime_search":
+    provide: "user.data.isRealtimeSearch === true"
+    request: true
+

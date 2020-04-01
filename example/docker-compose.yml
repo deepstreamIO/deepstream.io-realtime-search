@@ -24,6 +24,7 @@ services:
     environment:
       - MONGO_URL=mongodb://mongo/deepstream
       - MONGO_DATABASE=deepstream
+      - DEEPSTREAM_PASSWORD=deepstream_password
     volumes:
       - ./conf:/etc/deepstream/conf:ro
     ports:
@@ -36,8 +37,10 @@ services:
     command: 'mongo'
     environment:
       - DEEPSTREAM_URL=ws://deepstream:6020
+      - DEEPSTREAM_PASSWORD=deepstream_password
       - MONGO_DATABASE=deepstream
       - MONGO_URL=mongodb://mongo/deepstream
+      - MONGO_PRIMARY_KEY=ds_key
     depends_on:
       - deepstream
       - mongo

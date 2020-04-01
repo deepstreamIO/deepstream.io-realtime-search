@@ -1,0 +1,4 @@
+realtime_search:
+  password: "${DEEPSTREAM_PASSWORD}"
+  serverData:
+    isRealtimeSearch: true

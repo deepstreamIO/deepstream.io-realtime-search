@@ -21,6 +21,7 @@ export const mongo = (program: Command) => {
     .option('--logger-type <logger-type>', 'Log messages with pino or to std')
     .option('--log-level <level>', 'Log messages with this level and above', parseLogLevel)
     .option('--collection-lookup <fileName>', 'JSON file containing model lookups', loadJSON)
+    .option('--exclude-table-prefix', "Don't add the table prefix to results, this means you can't directly use named to load records")
     .option('--inspect <url>', 'Enable node inspector')
     .option('--native-query', 'Use native mongodb query syntax')
     .action(action)
@@ -42,7 +43,10 @@ function action () {
 
   let deepstreamCredentials = {}
   if (process.env.DEEPSTREAM_PASSWORD) {
-    deepstreamCredentials = { backendSecret: process.env.DEEPSTREAM_PASSWORD || 'deepstream_password' }
+    deepstreamCredentials = {
+      username: 'realtime_search',
+      password: process.env.DEEPSTREAM_PASSWORD || 'deepstream_password'
+    }
   } else if (providerCLI.dsCredentials || process.env.DEEPSTREAM_CREDENTIALS) {
     try {
       deepstreamCredentials = JSON.parse(providerCLI.dsCredentials || process.env.DEEPSTREAM_CREDENTIALS)
@@ -64,8 +68,9 @@ function action () {
       loggerType: providerCLI.loggerType || process.env.DEEPSTREAM_REALTIME_SEARCH_LOGGER_TYPE || 'std',
       logLevel: providerCLI.logLevel || process.env.DEEPSTREAM_REALTIME_SEARCH_LOG_LEVEL || LogLevel.INFO,
       collectionLookup: providerCLI.collectionLookup,
-      nativeQuery: providerCLI.nativeQuery,
-      primaryKey: process.env.MONGO_PRIMARY_KEY || 'ds_id'
+      nativeQuery: providerCLI.nativeQuery || false,
+      primaryKey: process.env.MONGO_PRIMARY_KEY || 'ds_key',
+      excludeTablePrefix: providerCLI.excludeTablePrefix || false
     })
     provider.start()
     process

@@ -3,6 +3,7 @@ import { MongoClient, Collection, ChangeStream, ObjectID, FilterQuery } from 'mo
 import { splitEvery } from 'ramda'
 import { StdLogger } from '../logger/std-logger'
 import { PinoLogger } from '../logger/pino-logger'
+import { objectIDConvertor } from './util'
 
 export class MongoDBSearch implements RealtimeSearch {
   private collection: Collection
@@ -17,18 +18,17 @@ export class MongoDBSearch implements RealtimeSearch {
     private callbacks: RealtimeSearchCallbacks,
     private mongoClient: MongoClient,
     private primaryKey: string,
+    private excludeTablePrefix: boolean,
     nativeQuery: boolean
   ) {
     if (!nativeQuery) {
       this.mongoQuery = this.convertToMongoQuery({}, this.query.query)
     } else {
-      Object.keys(this.mongoQuery).forEach((key: string) => {
-        if (ObjectID.isValid(this.mongoQuery[key])) {
-          // @ts-ignore
-          this.mongoQuery[key] = new ObjectID(this.mongoQuery[key])
-        }
-      })
+      this.mongoQuery = { $returnKey: true, ...this.mongoQuery }
+      this.logger.debug(`native query: ${JSON.stringify(this.mongoQuery)}`)
+      this.mongoQuery.$query = objectIDConvertor({}, this.mongoQuery.$query)
     }
+
     const db = this.mongoClient.db(this.database)
     this.collection = db.collection(this.query.table)
     this.changeStream = this.collection.watch([], {})
@@ -55,9 +55,18 @@ export class MongoDBSearch implements RealtimeSearch {
   }
 
   private async runQuery () {
-    const result = await this.collection.find(this.mongoQuery, { projection: { [this.primaryKey]: 1 } }).toArray()
-    const entries = result.map((r) => r[this.primaryKey])
-    this.callbacks.onResultsChanged(entries)
+    try {
+      const result = await this.collection.find(this.mongoQuery).toArray()
+      let entries = null
+      if (this.excludeTablePrefix) {
+        entries = result.map((r) => r[this.primaryKey])
+      } else {
+        entries = result.map((r) => `${this.query.table}/${r[this.primaryKey]}`)
+      }
+      this.callbacks.onResultsChanged(entries)
+    } catch (error) {
+      this.logger.error('Error running query', error)
+    }
   }
 
   private convertToMongoQuery (result: any, condition: any[]): any {
@@ -86,7 +95,7 @@ const mongonize = (result: any = {}, condition: any) => {
   const [field, operator] = condition
   let value = condition[2]
 
-  if (ObjectID.isValid(value)) {
+  if (ObjectID.isValid(value) && value.toString().length === 24) {
     value = new ObjectID(value)
   }
   switch (operator) {
